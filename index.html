@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table de Guerre — Chroniques de Feu et d'Acier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14110d;
+    --ink-2:#1c1812;
+    --parchment:#e8dfc7;
+    --parchment-dim:#d8ccac;
+    --parchment-text:#2a2118;
+    --gold:#b8862b;
+    --gold-bright:#d8a94a;
+    --green:#2f6b3c;
+    --black-fac:#232323;
+    --red:#a12f2f;
+    --neutral:#6b6b6b;
+    --line:#3a332a;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 700px at 20% -10%, #241d15 0%, transparent 60%),
+      radial-gradient(1200px 700px at 100% 0%, #1c1710 0%, transparent 55%),
+      var(--ink);
+    color:var(--parchment);
+    font-family:'EB Garamond', serif;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  h1,h2,h3, .display{
+    font-family:'Cinzel', serif;
+    letter-spacing:.03em;
+  }
+
+  /* ---------- App header ---------- */
+  .app-header{
+    padding:14px 22px 10px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .app-header h1{
+    font-size:1.15rem;
+    margin:0;
+    color:var(--gold-bright);
+    font-weight:600;
+    text-transform:uppercase;
+  }
+  .app-header .sub{
+    font-size:.85rem;
+    color:#a89b7d;
+    font-style:italic;
+  }
+  #conn-status{
+    font-size:.72rem;
+    padding:3px 9px;
+    border-radius:2px;
+    border:1px solid var(--line);
+    color:#a89b7d;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  #conn-status.local{color:#c9a24a;border-color:#5a4a26;}
+  #conn-status.synced{color:#7fae7f;border-color:#2f4a2f;}
+  #logout-btn{
+    display:none;
+    font-family:'Cinzel', serif;
+    font-size:.7rem;
+    background:transparent;
+    border:1px solid var(--line);
+    color:#a89b7d;
+    padding:3px 10px;
+    border-radius:2px;
+    cursor:pointer;
+    margin-left:8px;
+  }
+  #logout-btn:hover{ color:var(--red); border-color:var(--red); }
+
+  /* ---------- Login screen ---------- */
+  #login-screen{
+    position:fixed; inset:0; z-index:2000;
+    background:
+      radial-gradient(1200px 700px at 50% 0%, rgba(184,134,43,.08), transparent 60%),
+      var(--ink);
+    display:none;
+    align-items:center;
+    justify-content:center;
+  }
+  #login-screen.visible{ display:flex; }
+  #login-box{
+    background:linear-gradient(145deg, #241f17, #1b170f);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:2.4rem 2.2rem;
+    width:min(380px, 90vw);
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    position:relative;
+  }
+  #login-box::before{
+    content:'';
+    position:absolute; inset:6px;
+    border:1px solid rgba(184,134,43,.25);
+    border-radius:4px;
+    pointer-events:none;
+  }
+  #login-logo{
+    font-family:'Cinzel', serif;
+    font-size:1.4rem;
+    font-weight:700;
+    color:var(--gold-bright);
+    letter-spacing:.2em;
+    text-align:center;
+    margin-bottom:.3rem;
+  }
+  #login-sub{
+    font-size:.8rem;
+    color:#a89b7d;
+    font-style:italic;
+    text-align:center;
+    margin-bottom:1.6rem;
+  }
+  #login-dv{
+    height:1px;
+    background:linear-gradient(to right, transparent, var(--gold), transparent);
+    margin:0 auto 1.6rem;
+    max-width:220px;
+  }
+  #login-err{
+    display:none;
+    background:rgba(161,47,47,.15);
+    border:1px solid rgba(161,47,47,.4);
+    color:#e08a8a;
+    font-size:.8rem;
+    font-style:italic;
+    text-align:center;
+    padding:.5rem .8rem;
+    border-radius:3px;
+    margin-bottom:1rem;
+  }
+  #login-box label{
+    font-family:'Cinzel', serif;
+    font-size:.65rem;
+    font-weight:600;
+    color:#a89b7d;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    display:block;
+    margin-bottom:.3rem;
+  }
+  #login-box input{
+    width:100%;
+    margin-bottom:1rem;
+    background:#14110d;
+    border:1px solid rgba(184,134,43,.35);
+    border-radius:3px;
+    padding:.5rem .7rem;
+    font-family:'EB Garamond', serif;
+    font-size:.95rem;
+    color:var(--parchment);
+    outline:none;
+  }
+  #login-box input:focus{ border-color:var(--gold); }
+  #login-btn{
+    width:100%;
+    background:rgba(184,134,43,.18);
+    border:1px solid var(--gold);
+    border-radius:3px;
+    padding:.6rem;
+    font-family:'Cinzel', serif;
+    font-size:.78rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--gold-bright);
+    cursor:pointer;
+    margin-top:.2rem;
+  }
+  #login-btn:hover{ background:rgba(184,134,43,.32); }
+
+  /* ---------- Tabs ---------- */
+  .tabbar{
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    padding:10px 18px 0;
+    overflow-x:auto;
+    border-bottom:2px solid var(--gold);
+    background:linear-gradient(to bottom, transparent 85%, rgba(184,134,43,.08));
+  }
+  .tab{
+    position:relative;
+    padding:8px 30px 9px 16px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-bottom:none;
+    border-radius:6px 6px 0 0;
+    cursor:pointer;
+    color:#a89b7d;
+    font-family:'Cinzel', serif;
+    font-size:.8rem;
+    letter-spacing:.02em;
+    white-space:nowrap;
+    user-select:none;
+    transition:background .15s, color .15s;
+  }
+  .tab:hover{color:var(--parchment);}
+  .tab.active{
+    background:var(--parchment);
+    color:var(--parchment-text);
+    border-color:var(--gold);
+  }
+  .tab .close-tab{
+    position:absolute;
+    right:6px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:.85rem;
+    opacity:.5;
+    padding:0 3px;
+  }
+  .tab .close-tab:hover{opacity:1; color:var(--red);}
+  .tab-add{
+    padding:8px 14px;
+    background:transparent;
+    border:1px dashed var(--line);
+    border-bottom:none;
+    border-radius:6px 6px 0 0;
+    color:var(--gold);
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    font-size:.85rem;
+    align-self:flex-end;
+    margin-bottom:0;
+  }
+  .tab-add:hover{background:rgba(184,134,43,.12);}
+
+  /* ---------- Card header (year/moon/week) ---------- */
+  .card-toolbar{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:22px;
+    padding:12px 22px;
+    background:var(--parchment);
+    color:var(--parchment-text);
+    border-bottom:3px solid var(--gold);
+  }
+  .stat-group{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .stat-group label{
+    font-family:'Cinzel', serif;
+    font-size:.7rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#5a4a30;
+  }
+  .stepper{
+    display:flex;
+    align-items:center;
+    border:1px solid #b8a678;
+    border-radius:4px;
+    overflow:hidden;
+    background:#fbf6e8;
+  }
+  .stepper button{
+    border:none;
+    background:transparent;
+    color:#5a4a30;
+    width:24px;
+    height:26px;
+    cursor:pointer;
+    font-size:1rem;
+    font-family:'EB Garamond', serif;
+  }
+  .stepper button:hover{background:#e8dcb8;}
+  .stepper .val{
+    min-width:34px;
+    text-align:center;
+    font-weight:600;
+    font-size:.95rem;
+  }
+  .card-name-input{
+    font-family:'Cinzel', serif;
+    font-size:.95rem;
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed #a8946a;
+    color:var(--parchment-text);
+    padding:2px 2px 4px;
+    min-width:160px;
+  }
+  .card-name-input:focus{outline:none; border-bottom-color:var(--gold);}
+
+  .legend{
+    margin-left:auto;
+    display:flex;
+    gap:14px;
+    font-size:.78rem;
+    color:#5a4a30;
+    align-items:center;
+  }
+  .legend .chip{
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .legend .dot{
+    width:10px;height:10px;border-radius:50%;display:inline-block;
+    border:1px solid rgba(0,0,0,.3);
+  }
+
+  /* ---------- Layout: map + side panel ---------- */
+  .main-area{
+    flex:1;
+    display:flex;
+    min-height:0;
+    position:relative;
+  }
+
+  /* ---------- Map area ---------- */
+  .map-wrap{
+    flex:1;
+    min-width:0;
+    position:relative;
+    overflow:auto;
+    background:#0c0a08;
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(184,134,43,.05), transparent 60%);
+  }
+  .map-inner{
+    position:relative;
+    display:inline-block;
+    margin:20px;
+    box-shadow:0 0 0 6px #2a2015, 0 0 0 8px #6b5530, 0 12px 40px rgba(0,0,0,.6);
+  }
+  .map-inner img{
+    display:block;
+    user-select:none;
+    -webkit-user-drag:none;
+    cursor:crosshair;
+  }
+  .zoom-controls{
+    position:sticky;
+    top:14px;
+    left:100%;
+    transform:translateX(-100%);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    z-index:20;
+    width:36px;
+    margin-right:14px;
+    float:right;
+  }
+  .zoom-controls button{
+    width:36px;height:36px;
+    background:var(--parchment);
+    border:1px solid var(--gold);
+    color:var(--parchment-text);
+    border-radius:4px;
+    font-size:1.1rem;
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+  }
+  .zoom-controls button:hover{background:var(--gold-bright);}
+
+  .hint{
+    position:sticky;
+    top:14px;
+    margin:0 0 0 14px;
+    display:inline-block;
+    background:rgba(20,17,13,.85);
+    border:1px solid var(--line);
+    color:#c9bb95;
+    padding:6px 12px;
+    border-radius:4px;
+    font-size:.78rem;
+    font-style:italic;
+    pointer-events:none;
+  }
+
+  /* ---------- Side panel ---------- */
+  #panel-toggle{
+    position:absolute;
+    top:14px;
+    right:14px;
+    z-index:30;
+    width:34px;height:34px;
+    background:var(--parchment);
+    border:1px solid var(--gold);
+    border-radius:4px;
+    color:var(--parchment-text);
+    cursor:pointer;
+    font-size:1rem;
+  }
+  #panel-toggle:hover{ background:var(--gold-bright); }
+  #main-area.panel-collapsed #panel-toggle{ right:14px; }
+  #main-area.panel-collapsed #side-panel{ display:none; }
+
+  #side-panel{
+    width:290px;
+    flex-shrink:0;
+    background:var(--ink-2);
+    border-left:2px solid var(--gold);
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .panel-head{
+    padding:14px 16px 10px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+  }
+  .panel-head h3{
+    margin:0;
+    font-size:.85rem;
+    color:var(--gold-bright);
+    text-transform:uppercase;
+  }
+  .panel-head .count{
+    font-size:.72rem;
+    color:#a89b7d;
+    background:var(--ink);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1px 8px;
+  }
+  .panel-filters{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:10px 16px;
+    border-bottom:1px solid var(--line);
+  }
+  .panel-filters select{
+    width:100%;
+    padding:6px 8px;
+    background:var(--ink);
+    border:1px solid var(--line);
+    color:var(--parchment);
+    border-radius:4px;
+    font-family:'EB Garamond', serif;
+    font-size:.85rem;
+  }
+  .panel-list{
+    flex:1;
+    overflow-y:auto;
+    padding:8px;
+  }
+  .panel-empty{
+    color:#7a6c50;
+    font-size:.82rem;
+    font-style:italic;
+    padding:16px 10px;
+    text-align:center;
+  }
+  .panel-group-label{
+    font-family:'Cinzel', serif;
+    font-size:.66rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:#8a7a55;
+    padding:10px 6px 4px;
+  }
+  .panel-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:7px 8px;
+    border-radius:5px;
+    cursor:pointer;
+    border:1px solid transparent;
+  }
+  .panel-item:hover{
+    background:rgba(184,134,43,.1);
+    border-color:var(--line);
+  }
+  .panel-item .icon-wrap{
+    width:28px; height:28px;
+    flex-shrink:0;
+  }
+  .panel-item .meta{
+    min-width:0;
+    flex:1;
+  }
+  .panel-item .meta .nom{
+    font-size:.85rem;
+    color:var(--parchment);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .panel-item .meta .sub{
+    font-size:.7rem;
+    color:#8a7a55;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* ---------- Markers ---------- */
+  .marker{
+    position:absolute;
+    transform:translate(-50%,-100%);
+    transform-origin:50% 100%;
+    cursor:grab;
+    z-index:5;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.75));
+    transition:transform .12s ease, filter .12s ease;
+  }
+  .marker:hover{
+    transform:translate(-50%,-100%) scale(1.35);
+    filter:drop-shadow(0 5px 10px rgba(0,0,0,.9)) brightness(1.18);
+    z-index:12;
+  }
+  .marker:active{cursor:grabbing; z-index:15;}
+  .marker svg{ display:block; }
+  .marker .label{
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    font-family:'Cinzel', serif;
+    font-size:.62rem;
+    background:rgba(20,17,13,.88);
+    color:var(--parchment);
+    padding:1px 6px;
+    border-radius:3px;
+    margin-top:3px;
+    letter-spacing:.02em;
+    pointer-events:none;
+    border:1px solid rgba(184,134,43,.4);
+    transition:font-size .12s ease, background .12s ease;
+  }
+  .marker:hover .label{
+    font-size:.72rem;
+    background:rgba(20,17,13,.97);
+    border-color:var(--gold-bright);
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(10,8,6,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--parchment);
+    color:var(--parchment-text);
+    width:100%;
+    max-width:460px;
+    max-height:92vh;
+    overflow-y:auto;
+    border-radius:8px;
+    border:2px solid var(--gold);
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+  }
+  .modal-head{
+    padding:16px 20px 10px;
+    border-bottom:1px solid #cfc09a;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .modal-head h2{
+    margin:0;
+    font-size:1rem;
+    text-transform:uppercase;
+  }
+  .modal-head .x{
+    cursor:pointer;
+    font-size:1.3rem;
+    color:#8a7a55;
+    line-height:1;
+  }
+  .modal-head .x:hover{color:var(--red);}
+  .modal-body{ padding:16px 20px; }
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    font-family:'Cinzel', serif;
+    font-size:.68rem;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    color:#5a4a30;
+    margin-bottom:6px;
+  }
+  .field input[type=text], .field input[type=number]{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid #b8a678;
+    border-radius:4px;
+    background:#fbf6e8;
+    font-family:'EB Garamond', serif;
+    font-size:.95rem;
+    color:var(--parchment-text);
+  }
+  .field input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+
+  .type-choice{
+    display:flex;
+    gap:8px;
+  }
+  .type-choice .opt{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding:10px 4px 8px;
+    border:1.5px solid #b8a678;
+    border-radius:6px;
+    cursor:pointer;
+    background:#fbf6e8;
+    font-size:.72rem;
+    font-family:'Cinzel', serif;
+    color:#5a4a30;
+  }
+  .type-choice .opt.sel{
+    border-color:var(--gold);
+    background:#f3e6bf;
+    color:var(--parchment-text);
+    box-shadow:0 0 0 2px rgba(184,134,43,.35) inset;
+  }
+  .type-choice .opt svg{ width:26px; height:26px; }
+
+  .faction-choice{ display:flex; gap:8px; }
+  .faction-choice .opt{
+    flex:1;
+    padding:8px 4px;
+    text-align:center;
+    border:1.5px solid #b8a678;
+    border-radius:6px;
+    cursor:pointer;
+    font-family:'Cinzel', serif;
+    font-size:.72rem;
+    color:#fff;
+    letter-spacing:.03em;
+  }
+  .faction-choice .opt.sel{ box-shadow:0 0 0 3px rgba(184,134,43,.5) inset; }
+  .faction-choice .opt[data-f="verts"]{ background:var(--green); }
+  .faction-choice .opt[data-f="noirs"]{ background:var(--black-fac); }
+  .faction-choice .opt[data-f="rouges"]{ background:var(--red); }
+  .faction-choice .opt[data-f=""]{ background:var(--neutral); }
+
+  .tags-input{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:7px;
+    border:1px solid #b8a678;
+    border-radius:4px;
+    background:#fbf6e8;
+  }
+  .tags-input input{
+    border:none;
+    background:transparent;
+    flex:1;
+    min-width:90px;
+    font-family:'EB Garamond', serif;
+    font-size:.92rem;
+    padding:3px;
+  }
+  .tags-input input:focus{ outline:none; }
+  .tag-chip{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:#e8dcb8;
+    border:1px solid #b8a678;
+    color:#3a2f1a;
+    padding:2px 4px 2px 9px;
+    border-radius:12px;
+    font-size:.82rem;
+  }
+  .tag-chip .rm{
+    cursor:pointer;
+    color:#8a6a3a;
+    font-weight:bold;
+    padding:0 5px;
+  }
+  .tag-chip .rm:hover{ color:var(--red); }
+
+  .modal-foot{
+    padding:14px 20px 18px;
+    display:flex;
+    gap:10px;
+    justify-content:space-between;
+    border-top:1px solid #cfc09a;
+  }
+  .btn{
+    font-family:'Cinzel', serif;
+    font-size:.78rem;
+    letter-spacing:.04em;
+    padding:9px 16px;
+    border-radius:4px;
+    border:1px solid var(--gold);
+    background:var(--gold);
+    color:#fff;
+    cursor:pointer;
+  }
+  .btn:hover{ background:var(--gold-bright); }
+  .btn.secondary{ background:transparent; color:#5a4a30; }
+  .btn.secondary:hover{ background:rgba(0,0,0,.05); }
+  .btn.danger{ background:transparent; border-color:var(--red); color:var(--red); }
+  .btn.danger:hover{ background:rgba(161,47,47,.1); }
+  .foot-left{ display:flex; gap:8px; }
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="visible">
+  <div id="login-box">
+    <div id="login-logo">COFAS</div>
+    <div id="login-sub">Table de Guerre — Connexion MJ</div>
+    <div id="login-dv"></div>
+    <div id="login-err"></div>
+    <label for="login-email">Adresse e-mail</label>
+    <input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email">
+    <label for="login-password">Mot de passe</label>
+    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    <button id="login-btn">Connexion</button>
+  </div>
+</div>
+
+<div class="app-header">
+  <div>
+    <h1>Table de Guerre</h1>
+    <div class="sub">Chroniques de Feu et d'Acier — mouvements des forces à travers Westeros</div>
+  </div>
+  <div style="display:flex; align-items:center;">
+    <div id="conn-status" class="local">Non connecté</div>
+    <button id="logout-btn">⎋ Déconnexion</button>
+  </div>
+</div>
+
+<div id="migration-banner" style="display:none; align-items:center; gap:14px; padding:10px 22px; background:#2a2210; border-bottom:1px solid var(--gold); color:#e8dfc7; font-size:.85rem;">
+  <span id="migration-text"></span>
+  <button class="btn" id="migration-import" style="padding:6px 12px; font-size:.72rem;">Importer vers Firebase</button>
+  <button class="btn secondary" id="migration-dismiss" style="padding:6px 12px; font-size:.72rem; color:#e8dfc7; border-color:#5a4a26;">Ignorer</button>
+</div>
+
+<div class="tabbar" id="tabbar"></div>
+
+<div class="card-toolbar" id="card-toolbar" style="display:none;">
+  <input type="text" class="card-name-input" id="card-name" placeholder="Nom de la carte">
+
+  <div class="stat-group">
+    <label>Année</label>
+    <div class="stepper">
+      <button data-step="annee" data-dir="-1">–</button>
+      <span class="val" id="v-annee">135</span>
+      <button data-step="annee" data-dir="1">+</button>
+    </div>
+  </div>
+
+  <div class="stat-group">
+    <label>Lune</label>
+    <div class="stepper">
+      <button data-step="lune" data-dir="-1">–</button>
+      <span class="val" id="v-lune">1 / 12</span>
+      <button data-step="lune" data-dir="1">+</button>
+    </div>
+  </div>
+
+  <div class="stat-group">
+    <label>Semaine</label>
+    <div class="stepper">
+      <button data-step="semaine" data-dir="-1">–</button>
+      <span class="val" id="v-semaine">1</span>
+      <button data-step="semaine" data-dir="1">+</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="chip"><span class="dot" style="background:#2f6b3c"></span>Verts</span>
+    <span class="chip"><span class="dot" style="background:#232323"></span>Noirs</span>
+    <span class="chip"><span class="dot" style="background:#a12f2f"></span>Rouges</span>
+    <span class="chip"><span class="dot" style="background:#6b6b6b"></span>Neutre</span>
+  </div>
+</div>
+
+<div class="main-area" id="main-area" style="display:none;">
+  <div class="map-wrap" id="map-wrap">
+    <div class="hint">Clic : nouveau marqueur · Clic-glisser sur la carte : se déplacer · Glisser un marqueur : le déplacer · Molette : zoomer</div>
+    <div class="zoom-controls">
+      <button id="zoom-in" title="Zoomer">+</button>
+      <button id="zoom-reset" title="Réinitialiser">⟳</button>
+      <button id="zoom-out" title="Dézoomer">–</button>
+    </div>
+    <div class="map-inner" id="map-inner">
+      <img id="map-img" src="westeros.png" alt="Carte de Westeros" draggable="false">
+    </div>
+  </div>
+
+  <button id="panel-toggle" title="Afficher/masquer la liste">☰</button>
+  <aside id="side-panel">
+    <div class="panel-head">
+      <h3>Forces sur la carte</h3>
+      <span class="count" id="panel-count">0</span>
+    </div>
+    <div class="panel-filters">
+      <select id="filter-type">
+        <option value="">Tous les types</option>
+        <option value="armee">Armées</option>
+        <option value="flotte">Flottes</option>
+        <option value="dragon">Dragons</option>
+      </select>
+      <select id="filter-faction">
+        <option value="__all">Toutes factions</option>
+        <option value="verts">Verts</option>
+        <option value="noirs">Noirs</option>
+        <option value="rouges">Rouges</option>
+        <option value="__neutre">Neutre</option>
+      </select>
+      <select id="sort-by">
+        <option value="faction">Trier : Faction</option>
+        <option value="type">Trier : Type</option>
+        <option value="nom">Trier : Nom</option>
+      </select>
+    </div>
+    <div class="panel-list" id="panel-list"></div>
+  </aside>
+</div>
+
+<div id="empty-state" style="flex:1; display:flex; align-items:center; justify-content:center; color:#8a7a55; font-family:'Cinzel',serif;">
+  Ajoutez une carte pour commencer &mdash; bouton "+ Nouvelle carte"
+</div>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modal-title">Nouveau marqueur</h2>
+      <span class="x" id="modal-close">&times;</span>
+    </div>
+    <div class="modal-body">
+
+      <div class="field">
+        <label>Type</label>
+        <div class="type-choice" id="type-choice">
+          <div class="opt" data-type="armee">
+            <svg viewBox="0 0 100 100"><g id="icon-armee-preview"></g></svg>
+            Armée
+          </div>
+          <div class="opt" data-type="flotte">
+            <svg viewBox="0 0 100 100"><g id="icon-flotte-preview"></g></svg>
+            Flotte
+          </div>
+          <div class="opt" data-type="dragon">
+            <svg viewBox="0 0 100 100"><g id="icon-dragon-preview"></g></svg>
+            Dragon
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label id="label-nom">Nom</label>
+        <input type="text" id="f-nom" placeholder="Ex. Armée de Peyredragon">
+      </div>
+
+      <div class="field" id="field-effectifs">
+        <label id="label-effectifs">Troupes</label>
+        <input type="number" id="f-effectifs" min="0" placeholder="0">
+      </div>
+
+      <div class="field">
+        <label>Personnages rattachés</label>
+        <div class="tags-input" id="tags-personnages">
+          <input type="text" id="input-personnages" placeholder="Nom, puis Entrée">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Maisons</label>
+        <div class="tags-input" id="tags-maisons">
+          <input type="text" id="input-maisons" placeholder="Nom, puis Entrée">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Faction</label>
+        <div class="faction-choice" id="faction-choice">
+          <div class="opt" data-f="verts">Verts</div>
+          <div class="opt" data-f="noirs">Noirs</div>
+          <div class="opt" data-f="rouges">Rouges</div>
+          <div class="opt" data-f="">Neutre</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <div class="foot-left">
+        <button class="btn secondary" id="btn-cancel">Annuler</button>
+        <button class="btn danger" id="btn-delete" style="display:none;">Supprimer</button>
+      </div>
+      <button class="btn" id="btn-save">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+/* =========================================================================
+   FIREBASE — Realtime Database + connexion e-mail/mot de passe
+   (même projet et même mode de connexion que tes autres outils COFAS)
+   ========================================================================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase, ref, push, set, update, remove, onValue
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6FT3KQWP-Mysvsshwfi0MispI64qB9TA",
+  authDomain: "cofas-mj.firebaseapp.com",
+  databaseURL: "https://cofas-mj-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "cofas-mj",
+  storageBucket: "cofas-mj.firebasestorage.app",
+  messagingSenderId: "48749901019",
+  appId: "1:48749901019:web:4f1129e84a2b3a8e8688fe"
+};
+// Astuce reprise de tes autres outils : ajoute ?local=cofas à l'URL pour
+// travailler hors-ligne si la connexion Firebase échoue ou traîne.
+const forceLocalParam = new URLSearchParams(location.search).get('local') === 'cofas';
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+const ROOT = 'table_de_guerre';
+
+/* ============================= ICONS ============================== */
+// Toutes les icônes sont dessinées sur une grille 0-100 (voir viewBox de markerSVG)
+const ICONS = {
+  // deux épées croisées
+  armee: `<g transform="rotate(45 50 50)" fill="currentColor">
+      <path d="M50 20 L53 58 L50 63 L47 58 Z"/>
+      <rect x="44" y="57" width="12" height="3" rx="1"/>
+      <rect x="48.5" y="60" width="3" height="14" rx="1.5"/>
+      <circle cx="50" cy="76" r="2.6"/>
+    </g>
+    <g transform="rotate(-45 50 50)" fill="currentColor">
+      <path d="M50 20 L53 58 L50 63 L47 58 Z"/>
+      <rect x="44" y="57" width="12" height="3" rx="1"/>
+      <rect x="48.5" y="60" width="3" height="14" rx="1.5"/>
+      <circle cx="50" cy="76" r="2.6"/>
+    </g>`,
+  // un navire, voile au vent
+  flotte: `<g fill="currentColor">
+      <path d="M25,68 C25,68 37,80 50,80 C63,80 75,68 75,68 L69,61 C69,61 58,70 50,70 C42,70 31,61 31,61 Z"/>
+      <rect x="49" y="18" width="2" height="45"/>
+      <path d="M51,20 L70,38 L51,42 Z"/>
+      <path d="M51,26 L36,40 L51,42 Z" opacity="0.8"/>
+      <path d="M51,18 L59,20 L51,22 Z"/>
+    </g>`,
+  // dragon de profil, en vol
+  dragon: `<g fill="currentColor">
+      <path d="M10,55 C16,47 25,43 35,41 C46,39 57,45 66,53 C76,58 85,65 91,73
+               C86,70 79,64 69,60 C59,56 49,54 39,54 C30,54 21,56 13,60
+               C10,58 9,56 10,55 Z"/>
+      <path d="M13,58 C9,57 5,55 2,52 C6,53 10,54 14,55 Z"/>
+      <path d="M22,42 C22,38 24,34 28,32 C27,36 26,40 27,43 Z"/>
+      <path d="M37,43 L40,18 L45,30 L49,10 L53,28 L60,15 L61,34 C53,42 44,45 37,43 Z"/>
+      <path d="M46,55 L44,64 L48,63 L47,57 Z"/>
+      <path d="M55,57 L54,66 L58,65 L57,59 Z"/>
+      <path d="M88,70 L96,76 L89,76 Z"/>
+      <circle cx="18" cy="52" r="1.8" fill="#e8dfc7"/>
+    </g>`
+};
+function markerSVG(type, colorHex, size){
+  size = size || 38;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="color:${colorHex}">
+    <circle cx="50" cy="50" r="47" fill="#14110d" fill-opacity="0.35"/>
+    <circle cx="50" cy="50" r="46" fill="${colorHex}" fill-opacity="0.32" stroke="${colorHex}" stroke-width="5"/>
+    <circle cx="50" cy="50" r="46" fill="none" stroke="#e8dfc7" stroke-width="1.4" stroke-opacity="0.65"/>
+    ${ICONS[type]}
+  </svg>`;
+}
+// fill preview icons in the modal type-choice buttons
+document.getElementById('icon-armee-preview').innerHTML = ICONS.armee.replace(/currentColor/g,'#5a4a30');
+document.getElementById('icon-flotte-preview').innerHTML = ICONS.flotte.replace(/currentColor/g,'#5a4a30');
+document.getElementById('icon-dragon-preview').innerHTML = ICONS.dragon.replace(/currentColor/g,'#5a4a30');
+
+const FACTION_COLORS = { verts:'#2f6b3c', noirs:'#232323', rouges:'#a12f2f', '':'#6b6b6b' };
+const TYPE_LABELS = { armee:'Troupes', flotte:'Navires', dragon:null };
+
+/* ============================= STATE ============================== */
+let cards = [];              // [{id, nom, annee, lune, semaine, ordre}]
+let markersByCard = {};      // { cardId: [ {id, type, nom, effectifs, personnages, maisons, faction, x, y} ] }
+let activeCardId = null;
+let useFirebase = false;
+let appStarted = false;
+
+let editingMarkerId = null;  // null = creating new
+let pendingCoords = null;    // {x,y} for new marker
+let currentType = 'armee';
+let currentFaction = '';
+let tagsPersonnages = [];
+let tagsMaisons = [];
+
+/* ============================= STORAGE : repli local ============================== */
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function localLoad(){
+  try{
+    cards = JSON.parse(localStorage.getItem('cofas_wt_cards') || '[]');
+    markersByCard = JSON.parse(localStorage.getItem('cofas_wt_markers') || '{}');
+  }catch(e){ cards = []; markersByCard = {}; }
+}
+function localSaveCards(){ localStorage.setItem('cofas_wt_cards', JSON.stringify(cards)); }
+function localSaveMarkers(){ localStorage.setItem('cofas_wt_markers', JSON.stringify(markersByCard)); }
+
+function setConnStatus(text, cls){
+  const el = document.getElementById('conn-status');
+  el.textContent = text;
+  el.className = cls;
+}
+function showLogin(){
+  document.getElementById('login-screen').classList.add('visible');
+  document.getElementById('logout-btn').style.display = 'none';
+}
+function hideLogin(){
+  document.getElementById('login-screen').classList.remove('visible');
+  document.getElementById('logout-btn').style.display = 'inline-block';
+}
+
+/* ============================= CONNEXION ============================== */
+function doLogin(){
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  if(!email || !pass){
+    errEl.textContent = 'Renseigne ton e-mail et ton mot de passe.';
+    errEl.style.display = 'block';
+    return;
+  }
+  signInWithEmailAndPassword(auth, email, pass).catch(e=>{
+    errEl.textContent = 'Connexion refusée : ' + (e.code || e.message);
+    errEl.style.display = 'block';
+  });
+}
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') doLogin();
+});
+document.getElementById('logout-btn').addEventListener('click', ()=>{
+  signOut(auth).catch(()=>{});
+});
+
+onAuthStateChanged(auth, (user)=>{
+  if(user){
+    useFirebase = true;
+    hideLogin();
+    setConnStatus('Synchronisé — ' + user.email, 'synced');
+    startApp();
+  } else if(!forceLocalParam){
+    useFirebase = false;
+    appStarted = false;
+    showLogin();
+    setConnStatus('Non connecté', 'local');
+  }
+});
+
+// Repli local explicite via ?local=cofas (utile pour tester hors-ligne)
+if(forceLocalParam){
+  setTimeout(()=>{
+    if(!appStarted){
+      useFirebase = false;
+      appStarted = true;
+      hideLogin();
+      setConnStatus('Mode local (?local=cofas)', 'local');
+      localLoad();
+      renderTabs();
+      if(cards.length) selectCard(cards[0].id); else showEmptyState();
+    }
+  }, 300);
+}
+// Si la connexion Firebase ne répond pas du tout après 8s (réseau coupé, etc.)
+setTimeout(()=>{
+  if(!appStarted && !forceLocalParam){
+    const errEl = document.getElementById('login-err');
+    errEl.textContent = 'Connexion Firebase indisponible. Vérifie ta connexion, ou ajoute ?local=cofas à l\'URL pour travailler hors-ligne.';
+    errEl.style.display = 'block';
+  }
+}, 8000);
+
+function startApp(){
+  if(appStarted) return;
+  appStarted = true;
+  listenFirebase();
+  checkLocalMigration();
+}
+
+/* ---- migration des données locales existantes vers Firebase ---- */
+function checkLocalMigration(){
+  let localCards = [];
+  try{ localCards = JSON.parse(localStorage.getItem('cofas_wt_cards') || '[]'); }catch(e){}
+  if(!localCards.length || !useFirebase) return;
+
+  const banner = document.getElementById('migration-banner');
+  document.getElementById('migration-text').textContent =
+    `Des données locales ont été trouvées (${localCards.length} carte${localCards.length>1?'s':''}). Les importer vers Firebase ?`;
+  banner.style.display = 'flex';
+
+  document.getElementById('migration-dismiss').onclick = ()=>{ banner.style.display = 'none'; };
+  document.getElementById('migration-import').onclick = async ()=>{
+    const btn = document.getElementById('migration-import');
+    btn.disabled = true;
+    btn.textContent = 'Import en cours…';
+    let localMarkers = {};
+    try{ localMarkers = JSON.parse(localStorage.getItem('cofas_wt_markers') || '{}'); }catch(e){}
+
+    for(const c of localCards){
+      const {id: oldId, ...cardData} = c;
+      const newRef = push(ref(db, ROOT + '/cartes'));
+      await set(newRef, cardData);
+      const newId = newRef.key;
+      const markers = localMarkers[oldId] || [];
+      for(const m of markers){
+        const {id: oldMarkerId, carteId, ...markerData} = m;
+        const mRef = push(ref(db, ROOT + '/marqueurs/' + newId));
+        await set(mRef, markerData);
+      }
+    }
+    localStorage.removeItem('cofas_wt_cards');
+    localStorage.removeItem('cofas_wt_markers');
+    banner.style.display = 'none';
+  };
+}
+
+function listenFirebase(){
+  onValue(ref(db, ROOT + '/cartes'), snap=>{
+    const val = snap.val() || {};
+    cards = Object.keys(val).map(id=>({id, ...val[id]}));
+    renderTabs();
+    if(!activeCardId && cards.length) selectCard(cards[0].id);
+    else if(activeCardId && !cards.find(c=>c.id===activeCardId)){
+      activeCardId = null;
+      cards.length ? selectCard(cards[0].id) : showEmptyState();
+    } else if(activeCardId){
+      renderToolbar();
+    }
+    if(!cards.length) showEmptyState();
+  });
+  onValue(ref(db, ROOT + '/marqueurs'), snap=>{
+    const val = snap.val() || {};
+    const byCard = {};
+    Object.keys(val).forEach(carteId=>{
+      byCard[carteId] = Object.keys(val[carteId] || {}).map(mid=>({id: mid, carteId, ...val[carteId][mid]}));
+    });
+    markersByCard = byCard;
+    if(activeCardId) renderMarkers();
+  });
+}
+
+/* -------- CRUD wrappers (route to firebase or local) -------- */
+async function createCard(){
+  const nom = 'Nouvelle carte';
+  const ordre = cards.length ? Math.max(...cards.map(c=>c.ordre||0)) + 1 : 0;
+  const data = { nom, annee:135, lune:1, semaine:1, ordre };
+  if(useFirebase){
+    const newRef = push(ref(db, ROOT + '/cartes'));
+    await set(newRef, data);
+    return newRef.key;
+  }else{
+    const id = uid();
+    cards.push({id, ...data});
+    localSaveCards();
+    renderTabs();
+    return id;
+  }
+}
+async function updateCard(id, patch){
+  if(useFirebase){
+    await update(ref(db, ROOT + '/cartes/' + id), patch);
+  }else{
+    const c = cards.find(c=>c.id===id);
+    if(c){ Object.assign(c, patch); localSaveCards(); renderTabs(); if(id===activeCardId) renderToolbar(); }
+  }
+}
+async function deleteCard(id){
+  if(useFirebase){
+    await remove(ref(db, ROOT + '/cartes/' + id));
+    await remove(ref(db, ROOT + '/marqueurs/' + id));
+  }else{
+    cards = cards.filter(c=>c.id!==id);
+    delete markersByCard[id];
+    localSaveCards(); localSaveMarkers();
+    renderTabs();
+  }
+}
+
+async function createMarker(carteId, data){
+  if(useFirebase){
+    const newRef = push(ref(db, ROOT + '/marqueurs/' + carteId));
+    await set(newRef, data);
+  }else{
+    const id = uid();
+    (markersByCard[carteId] = markersByCard[carteId] || []).push({id, carteId, ...data});
+    localSaveMarkers();
+    renderMarkers();
+  }
+}
+async function updateMarker(carteId, id, patch){
+  if(useFirebase){
+    await update(ref(db, ROOT + '/marqueurs/' + carteId + '/' + id), patch);
+  }else{
+    const arr = markersByCard[carteId] || [];
+    const m = arr.find(m=>m.id===id);
+    if(m){ Object.assign(m, patch); localSaveMarkers(); renderMarkers(); }
+  }
+}
+async function deleteMarker(carteId, id){
+  if(useFirebase){
+    await remove(ref(db, ROOT + '/marqueurs/' + carteId + '/' + id));
+  }else{
+    markersByCard[carteId] = (markersByCard[carteId]||[]).filter(m=>m.id!==id);
+    localSaveMarkers();
+    renderMarkers();
+  }
+}
+
+/* ============================= TABS ============================== */
+function renderTabs(){
+  const bar = document.getElementById('tabbar');
+  bar.innerHTML = '';
+  cards.slice().sort((a,b)=>(a.ordre||0)-(b.ordre||0)).forEach(c=>{
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (c.id===activeCardId ? ' active':'');
+    tab.textContent = c.nom || 'Sans nom';
+    tab.title = 'Double-clic pour renommer';
+    tab.addEventListener('click', ()=>selectCard(c.id));
+    tab.addEventListener('dblclick', (e)=>{
+      e.stopPropagation();
+      const nn = prompt('Renommer la carte :', c.nom || '');
+      if(nn !== null && nn.trim()) updateCard(c.id, {nom: nn.trim()});
+    });
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'close-tab';
+    closeBtn.textContent = '×';
+    closeBtn.title = 'Supprimer cette carte';
+    closeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(confirm(`Supprimer la carte "${c.nom}" et tous ses marqueurs ?`)) deleteCard(c.id);
+    });
+    tab.appendChild(closeBtn);
+    bar.appendChild(tab);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'tab-add';
+  addBtn.textContent = '+ Nouvelle carte';
+  addBtn.addEventListener('click', async ()=>{
+    const id = await createCard();
+    selectCard(id);
+  });
+  bar.appendChild(addBtn);
+}
+
+function selectCard(id){
+  activeCardId = id;
+  renderTabs();
+  document.getElementById('card-toolbar').style.display = 'flex';
+  document.getElementById('main-area').style.display = 'flex';
+  document.getElementById('empty-state').style.display = 'none';
+  renderToolbar();
+  renderMarkers();
+}
+function showEmptyState(){
+  activeCardId = null;
+  document.getElementById('card-toolbar').style.display = 'none';
+  document.getElementById('main-area').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'flex';
+}
+
+/* ============================= TOOLBAR (annee/lune/semaine) ============================== */
+function currentCard(){ return cards.find(c=>c.id===activeCardId); }
+
+function renderToolbar(){
+  const c = currentCard();
+  if(!c) return;
+  document.getElementById('card-name').value = c.nom || '';
+  document.getElementById('v-annee').textContent = c.annee;
+  document.getElementById('v-lune').textContent = `${c.lune} / 12`;
+  document.getElementById('v-semaine').textContent = c.semaine;
+}
+
+document.getElementById('card-name').addEventListener('change', (e)=>{
+  if(activeCardId) updateCard(activeCardId, {nom: e.target.value.trim() || 'Sans nom'});
+});
+
+document.querySelectorAll('.stepper button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const c = currentCard();
+    if(!c) return;
+    const field = btn.dataset.step;
+    const dir = parseInt(btn.dataset.dir, 10);
+    let patch = {};
+    if(field === 'lune'){
+      let lune = c.lune + dir;
+      let annee = c.annee;
+      if(lune > 12){ lune = 1; annee += 1; }
+      if(lune < 1){ lune = 12; annee -= 1; }
+      patch = {lune, annee};
+    } else if(field === 'annee'){
+      patch = {annee: Math.max(0, c.annee + dir)};
+    } else if(field === 'semaine'){
+      patch = {semaine: Math.max(1, c.semaine + dir)};
+    }
+    updateCard(c.id, patch);
+  });
+});
+
+/* ============================= MAP / ZOOM ============================== */
+let zoom = 1;
+const mapImg = document.getElementById('map-img');
+function applyZoom(){
+  mapImg.style.width = (mapImg.naturalWidth ? mapImg.naturalWidth * zoom : 900*zoom) + 'px';
+}
+const ZOOM_MIN = 0.15, ZOOM_MAX = 4;
+document.getElementById('zoom-in').addEventListener('click', ()=>{ zoom = Math.min(zoom+0.15, ZOOM_MAX); applyZoom(); });
+document.getElementById('zoom-out').addEventListener('click', ()=>{ zoom = Math.max(zoom-0.15, ZOOM_MIN); applyZoom(); });
+document.getElementById('zoom-reset').addEventListener('click', ()=>{ zoom = 1; applyZoom(); });
+
+/* Zoom à la molette, ancré sur la position du curseur */
+const mapWrapEl = document.getElementById('map-wrap');
+mapWrapEl.addEventListener('wheel', (e)=>{
+  if(!activeCardId) return;
+  e.preventDefault();
+  const rect = mapWrapEl.getBoundingClientRect();
+  const cursorX = e.clientX - rect.left + mapWrapEl.scrollLeft;
+  const cursorY = e.clientY - rect.top + mapWrapEl.scrollTop;
+  const ratioX = cursorX / (mapImg.clientWidth || 1);
+  const ratioY = cursorY / (mapImg.clientHeight || 1);
+
+  const delta = e.deltaY < 0 ? 1.12 : 1/1.12;
+  const newZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom * delta));
+  if(newZoom === zoom) return;
+  zoom = newZoom;
+  applyZoom();
+
+  mapWrapEl.scrollLeft = ratioX * mapImg.clientWidth - (e.clientX - rect.left);
+  mapWrapEl.scrollTop = ratioY * mapImg.clientHeight - (e.clientY - rect.top);
+}, { passive:false });
+function fitInitialZoom(){
+  const wrapW = document.getElementById('map-wrap').clientWidth - 90;
+  zoom = Math.min(1, Math.max(0.3, wrapW / mapImg.naturalWidth));
+  applyZoom();
+}
+if(mapImg.complete && mapImg.naturalWidth) fitInitialZoom();
+else mapImg.addEventListener('load', fitInitialZoom);
+
+/* ============================= MARKERS RENDER ============================== */
+const mapInner = document.getElementById('map-inner');
+
+function renderMarkers(){
+  mapInner.querySelectorAll('.marker').forEach(el=>el.remove());
+  const list = markersByCard[activeCardId] || [];
+  list.forEach(m=>{
+    const el = document.createElement('div');
+    el.className = 'marker';
+    el.style.left = m.x + '%';
+    el.style.top = m.y + '%';
+    el.dataset.id = m.id;
+    const color = FACTION_COLORS[m.faction || ''];
+    el.innerHTML = markerSVG(m.type, color) + (m.nom ? `<div class="label">${escapeHtml(m.nom)}</div>` : '');
+    attachMarkerDrag(el, m);
+    mapInner.appendChild(el);
+  });
+  renderSidePanel();
+}
+
+/* ============================= SIDE PANEL ============================== */
+const TYPE_NAMES = { armee:'Armée', flotte:'Flotte', dragon:'Dragon' };
+const FACTION_NAMES = { verts:'Verts', noirs:'Noirs', rouges:'Rouges', '':'Neutre' };
+let panelFilterType = '';
+let panelFilterFaction = '__all';
+let panelSort = 'faction';
+
+function renderSidePanel(){
+  const listEl = document.getElementById('panel-list');
+  const countEl = document.getElementById('panel-count');
+  if(!activeCardId){ listEl.innerHTML = ''; countEl.textContent = '0'; return; }
+
+  let items = (markersByCard[activeCardId] || []).slice();
+
+  if(panelFilterType) items = items.filter(m => m.type === panelFilterType);
+  if(panelFilterFaction === '__neutre') items = items.filter(m => !m.faction);
+  else if(panelFilterFaction && panelFilterFaction !== '__all') items = items.filter(m => m.faction === panelFilterFaction);
+
+  countEl.textContent = items.length;
+
+  if(!items.length){
+    listEl.innerHTML = '<div class="panel-empty">Aucune force à afficher.<br>Clique sur la carte pour en ajouter une.</div>';
+    return;
+  }
+
+  const factionOrder = ['verts','noirs','rouges',''];
+  const typeOrder = ['armee','flotte','dragon'];
+
+  items.sort((a,b)=>{
+    if(panelSort === 'faction'){
+      const d = factionOrder.indexOf(a.faction||'') - factionOrder.indexOf(b.faction||'');
+      if(d) return d;
+      return (a.nom||'').localeCompare(b.nom||'');
+    }
+    if(panelSort === 'type'){
+      const d = typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
+      if(d) return d;
+      return (a.nom||'').localeCompare(b.nom||'');
+    }
+    return (a.nom||'Sans nom').localeCompare(b.nom||'Sans nom');
+  });
+
+  // group headers when sorting by faction or type
+  let lastGroup = null;
+  listEl.innerHTML = '';
+  items.forEach(m=>{
+    const groupKey = panelSort === 'faction' ? (m.faction||'') : panelSort === 'type' ? m.type : null;
+    if(groupKey !== null && groupKey !== lastGroup){
+      lastGroup = groupKey;
+      const label = document.createElement('div');
+      label.className = 'panel-group-label';
+      label.textContent = panelSort === 'faction' ? FACTION_NAMES[groupKey] : TYPE_NAMES[groupKey];
+      listEl.appendChild(label);
+    }
+    const color = FACTION_COLORS[m.faction || ''];
+    const row = document.createElement('div');
+    row.className = 'panel-item';
+    const sub = [TYPE_NAMES[m.type], m.effectifs ? `${m.effectifs}` : null, FACTION_NAMES[m.faction||'']]
+      .filter(Boolean).join(' · ');
+    row.innerHTML = `<span class="icon-wrap">${markerSVG(m.type, color, 28)}</span>
+      <span class="meta">
+        <div class="nom">${escapeHtml(m.nom || 'Sans nom')}</div>
+        <div class="sub">${escapeHtml(sub)}</div>
+      </span>`;
+    row.addEventListener('click', ()=> openEditModal(m));
+    listEl.appendChild(row);
+  });
+}
+
+document.getElementById('filter-type').addEventListener('change', (e)=>{
+  panelFilterType = e.target.value;
+  renderSidePanel();
+});
+document.getElementById('filter-faction').addEventListener('change', (e)=>{
+  panelFilterFaction = e.target.value;
+  renderSidePanel();
+});
+document.getElementById('sort-by').addEventListener('change', (e)=>{
+  panelSort = e.target.value;
+  renderSidePanel();
+});
+document.getElementById('panel-toggle').addEventListener('click', ()=>{
+  document.getElementById('main-area').classList.toggle('panel-collapsed');
+});
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function attachMarkerDrag(el, marker){
+  let startX, startY, moved, rect;
+  el.addEventListener('mousedown', (e)=>{
+    e.stopPropagation();
+    startX = e.clientX; startY = e.clientY; moved = false;
+    rect = mapInner.getBoundingClientRect();
+    const onMove = (ev)=>{
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
+      if(Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+      if(moved){
+        let x = (ev.clientX - rect.left) / rect.width * 100;
+        let y = (ev.clientY - rect.top) / rect.height * 100;
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+        el.style.left = x + '%';
+        el.style.top = y + '%';
+      }
+    };
+    const onUp = (ev)=>{
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      if(moved){
+        let x = (ev.clientX - rect.left) / rect.width * 100;
+        let y = (ev.clientY - rect.top) / rect.height * 100;
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+        updateMarker(activeCardId, marker.id, {x, y});
+      } else {
+        openEditModal(marker);
+      }
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+/* Clic simple = nouveau marqueur / Clic-glisser = déplacement (pan) sur la carte */
+let panState = null;
+mapImg.addEventListener('mousedown', (e)=>{
+  if(e.button !== 0) return;
+  e.preventDefault();
+  panState = {
+    startX: e.clientX, startY: e.clientY,
+    scrollLeft: mapWrapEl.scrollLeft, scrollTop: mapWrapEl.scrollTop,
+    moved: false
+  };
+  const onMove = (ev)=>{
+    const dx = ev.clientX - panState.startX;
+    const dy = ev.clientY - panState.startY;
+    if(Math.abs(dx) > 4 || Math.abs(dy) > 4) panState.moved = true;
+    if(panState.moved){
+      mapWrapEl.scrollLeft = panState.scrollLeft - dx;
+      mapWrapEl.scrollTop = panState.scrollTop - dy;
+      mapImg.style.cursor = 'grabbing';
+    }
+  };
+  const onUp = (ev)=>{
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    mapImg.style.cursor = 'crosshair';
+    if(!panState || !panState.moved){
+      const rect = mapInner.getBoundingClientRect();
+      const x = (ev.clientX - rect.left) / rect.width * 100;
+      const y = (ev.clientY - rect.top) / rect.height * 100;
+      openCreateModal({x, y});
+    }
+    panState = null;
+  };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+});
+
+/* ============================= MODAL ============================== */
+const overlay = document.getElementById('modal-overlay');
+const fNom = document.getElementById('f-nom');
+const fEffectifs = document.getElementById('f-effectifs');
+const fieldEffectifs = document.getElementById('field-effectifs');
+const labelEffectifs = document.getElementById('label-effectifs');
+const labelNom = document.getElementById('label-nom');
+
+function openCreateModal(coords){
+  editingMarkerId = null;
+  pendingCoords = coords;
+  document.getElementById('modal-title').textContent = 'Nouveau marqueur';
+  document.getElementById('btn-delete').style.display = 'none';
+  fNom.value = '';
+  fEffectifs.value = '';
+  tagsPersonnages = []; renderTags('personnages');
+  tagsMaisons = []; renderTags('maisons');
+  setType('armee');
+  setFaction('');
+  overlay.classList.add('open');
+  fNom.focus();
+}
+
+function openEditModal(marker){
+  editingMarkerId = marker.id;
+  pendingCoords = {x: marker.x, y: marker.y};
+  document.getElementById('modal-title').textContent = 'Modifier le marqueur';
+  document.getElementById('btn-delete').style.display = 'inline-block';
+  fNom.value = marker.nom || '';
+  fEffectifs.value = marker.effectifs || '';
+  tagsPersonnages = (marker.personnages || []).slice(); renderTags('personnages');
+  tagsMaisons = (marker.maisons || []).slice(); renderTags('maisons');
+  setType(marker.type || 'armee');
+  setFaction(marker.faction || '');
+  overlay.classList.add('open');
+}
+
+function closeModal(){
+  overlay.classList.remove('open');
+  editingMarkerId = null;
+  pendingCoords = null;
+}
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('btn-cancel').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+
+function setType(type){
+  currentType = type;
+  document.querySelectorAll('#type-choice .opt').forEach(o=>o.classList.toggle('sel', o.dataset.type === type));
+  if(type === 'dragon'){
+    fieldEffectifs.style.display = 'none';
+  } else {
+    fieldEffectifs.style.display = 'block';
+    labelEffectifs.textContent = TYPE_LABELS[type];
+  }
+  labelNom.textContent = type === 'dragon' ? 'Nom du dragon' : 'Nom';
+}
+document.querySelectorAll('#type-choice .opt').forEach(o=>{
+  o.addEventListener('click', ()=>setType(o.dataset.type));
+});
+
+function setFaction(f){
+  currentFaction = f;
+  document.querySelectorAll('#faction-choice .opt').forEach(o=>o.classList.toggle('sel', o.dataset.f === f));
+}
+document.querySelectorAll('#faction-choice .opt').forEach(o=>{
+  o.addEventListener('click', ()=>setFaction(o.dataset.f));
+});
+
+/* ---- tag inputs ---- */
+function renderTags(kind){
+  const container = document.getElementById('tags-' + kind);
+  const input = document.getElementById('input-' + kind);
+  container.querySelectorAll('.tag-chip').forEach(el=>el.remove());
+  const arr = kind === 'personnages' ? tagsPersonnages : tagsMaisons;
+  arr.forEach((t, idx)=>{
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${escapeHtml(t)} <span class="rm">&times;</span>`;
+    chip.querySelector('.rm').addEventListener('click', ()=>{
+      arr.splice(idx,1);
+      renderTags(kind);
+    });
+    container.insertBefore(chip, input);
+  });
+}
+function setupTagInput(kind){
+  const input = document.getElementById('input-' + kind);
+  input.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ','){
+      e.preventDefault();
+      const v = input.value.trim();
+      if(v){
+        const arr = kind === 'personnages' ? tagsPersonnages : tagsMaisons;
+        arr.push(v);
+        input.value = '';
+        renderTags(kind);
+      }
+    } else if(e.key === 'Backspace' && !input.value){
+      const arr = kind === 'personnages' ? tagsPersonnages : tagsMaisons;
+      if(arr.length){ arr.pop(); renderTags(kind); }
+    }
+  });
+}
+setupTagInput('personnages');
+setupTagInput('maisons');
+
+document.getElementById('btn-save').addEventListener('click', async ()=>{
+  if(!activeCardId || !pendingCoords) return;
+  const data = {
+    type: currentType,
+    nom: fNom.value.trim(),
+    effectifs: currentType === 'dragon' ? null : (parseInt(fEffectifs.value,10) || 0),
+    personnages: tagsPersonnages.slice(),
+    maisons: tagsMaisons.slice(),
+    faction: currentFaction,
+    x: pendingCoords.x,
+    y: pendingCoords.y
+  };
+  if(editingMarkerId){
+    await updateMarker(activeCardId, editingMarkerId, data);
+  } else {
+    await createMarker(activeCardId, data);
+  }
+  closeModal();
+});
+
+document.getElementById('btn-delete').addEventListener('click', async ()=>{
+  if(editingMarkerId && confirm('Supprimer ce marqueur ?')){
+    await deleteMarker(activeCardId, editingMarkerId);
+    closeModal();
+  }
+});
+
+/* ============================= INIT =============================
+   L'initialisation démarre depuis onAuthStateChanged() plus haut
+   (ou depuis le repli ?local=cofas) — rien à appeler ici. */
+
+</script>
+</body>
+</html>
